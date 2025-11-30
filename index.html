@@ -1,10 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MQTT Router Resetter</title>
+    <link rel="icon" type="image/png" href="/pwa-icon.png" />
+    <link rel="apple-touch-icon" href="/pwa-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#1f2937" />
+    <title>Remote rebooter app</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -15,20 +19,21 @@
       }
     </script>
     <script>
-      // Polyfill global for MQTT library support in browser
+      // Polyfill global for MQTT.js library support in browser
       window.global = window;
     </script>
   <script type="importmap">
 {
   "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "vite-plugin-pwa": "https://aistudiocdn.com/vite-plugin-pwa@^1.2.0",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "jsqr": "https://aistudiocdn.com/jsqr@^1.4.0",
     "crypto-js": "https://aistudiocdn.com/crypto-js@^4.2.0",
-    "mqtt": "https://aistudiocdn.com/mqtt@^5.14.1",
-    "vite": "https://aistudiocdn.com/vite@^7.2.4",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
+    "mqtt": "https://aistudiocdn.com/mqtt@^5.14.1"
   }
 }
 </script>

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import useLocalStorage from './hooks/useLocalStorage';
 import type { Device, Schedule, ResetHistoryEntry } from './types';
@@ -6,6 +7,8 @@ import DeviceList from './components/DeviceList';
 import DevicePanel from './components/DevicePanel';
 import AddDeviceModal from './components/AddDeviceModal';
 import SideMenu from './components/SideMenu';
+import InstallPrompt from './components/InstallPrompt';
+import SplashScreen from './components/SplashScreen';
 import { PlusIcon } from './components/icons';
 import { useMqttManager, type DeviceMqttState } from './hooks/useMqttManager';
 import MqttContext from './contexts/MqttContext';
@@ -18,6 +21,9 @@ const App: React.FC = () => {
   const [resetHistory, setResetHistory] = useLocalStorage<ResetHistoryEntry[]>('resetHistory', []);
   const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('theme', 'dark');
   
+  // Splash Screen State
+  const [showSplash, setShowSplash] = useState(true);
+
   useEffect(() => {
     const root = window.document.documentElement;
     if (theme === 'dark') {
@@ -169,6 +175,10 @@ const App: React.FC = () => {
 
   return (
     <MqttContext.Provider value={{ statuses, publish }}>
+      
+      {/* Splash Screen - conditionally rendered */}
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      
       <SideMenu 
         isOpen={isMenuOpen} 
         onClose={() => setMenuOpen(false)} 
@@ -223,6 +233,9 @@ const App: React.FC = () => {
             onAddDevice={addDevice} 
           />
         )}
+        
+        {/* PWA Install Prompt - Always last to sit on top */}
+        <InstallPrompt />
       </div>
     </MqttContext.Provider>
   );
