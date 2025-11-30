@@ -4,6 +4,7 @@ import type { Device } from '../types';
 import { MoreVerticalIcon, ClockIcon, WifiIcon, SignalHighIcon, SignalLowIcon, SignalXIcon, DownloadIcon } from './icons';
 import MqttContext from '../contexts/MqttContext';
 import { MqttStatus } from '../hooks/useMqttManager';
+import ConfirmModal from './ConfirmModal';
 
 interface DeviceListItemProps {
   device: Device;
@@ -106,6 +107,7 @@ const DeviceListItem: React.FC<DeviceListItemProps> = ({ device, onSelect, onDel
   const otaStatus = deviceStatus?.otaStatus;
 
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleToggleMenu = (e: React.MouseEvent) => {
@@ -119,12 +121,15 @@ const DeviceListItem: React.FC<DeviceListItemProps> = ({ device, onSelect, onDel
     onRename(device.device_id);
   };
   
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setMenuOpen(false);
-    if(window.confirm(`Are you sure you want to delete "${device.custom_name}"?`)) {
-        onDelete(device.device_id);
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(device.device_id);
+    setShowDeleteConfirm(false);
   };
   
   useEffect(() => {
@@ -211,79 +216,93 @@ const DeviceListItem: React.FC<DeviceListItemProps> = ({ device, onSelect, onDel
   const displayIsPoweredOff = mqttIsPoweredOff !== undefined ? mqttIsPoweredOff : device.isPoweredOff;
 
   return (
-    <div
-      className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg flex flex-col justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
-      onClick={() => onSelect(device.device_id)}
-    >
-      <div>
-        <div className="flex justify-between items-start">
-            <div className="flex-1 min-w-0 mr-2">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">{device.custom_name}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate">{device.device_id}</p>
-            </div>
-            <div className="relative flex items-center" ref={menuRef}>
-              {displayIsPoweredOff && (
-                  <div className="mr-2 flex items-center justify-center px-2 py-1 bg-red-100 dark:bg-red-900/50 rounded border border-red-200 dark:border-red-800 shadow-sm" title="Relay is Powered Off">
-                      <span className="text-xs font-bold text-red-600 dark:text-red-400 whitespace-nowrap">POWER OFF</span>
-                  </div>
-              )}
-
-              {isSignalLost ? (
-                  <div className="mr-2 flex items-center justify-center px-2 py-1" title="No Signal">
-                      <SignalXIcon className="w-5 h-5 text-red-500" />
-                  </div>
-              ) : ping !== null ? (
-                  <div className="mr-2 flex items-center bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm" title={`Ping: ${ping}ms`}>
-                      <span className={`text-xs font-mono font-bold mr-1.5 ${ping < 30 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                          {ping}ms
-                      </span>
-                      {ping < 30 ? (
-                          <SignalHighIcon className="w-4 h-4 text-green-500" />
-                      ) : (
-                          <SignalLowIcon className="w-4 h-4 text-orange-500" />
-                      )}
-                  </div>
-              ) : (
-                  <div className="mr-2 flex items-center justify-center px-2 py-1" title="Waiting for signal...">
-                      <SignalLowIcon className="w-5 h-5 text-gray-400 animate-pulse" />
-                  </div>
-              )}
-
-              <button onClick={handleToggleMenu} className="p-2 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                  <MoreVerticalIcon className="w-5 h-5" />
-              </button>
-              {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-900 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700 top-full">
-                  <button onClick={handleRename} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-md">Rename</button>
-                  <button onClick={handleDelete} className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-md">Delete</button>
+    <>
+        <div
+        className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg flex flex-col justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
+        onClick={() => onSelect(device.device_id)}
+        >
+        <div>
+            <div className="flex justify-between items-start">
+                <div className="flex-1 min-w-0 mr-2">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">{device.custom_name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate">{device.device_id}</p>
                 </div>
-              )}
+                <div className="relative flex items-center" ref={menuRef}>
+                {displayIsPoweredOff && (
+                    <div className="mr-2 flex items-center justify-center px-2 py-1 bg-red-100 dark:bg-red-900/50 rounded border border-red-200 dark:border-red-800 shadow-sm" title="Relay is Powered Off">
+                        <span className="text-xs font-bold text-red-600 dark:text-red-400 whitespace-nowrap">POWER OFF</span>
+                    </div>
+                )}
+
+                {isSignalLost ? (
+                    <div className="mr-2 flex items-center justify-center px-2 py-1" title="No Signal">
+                        <SignalXIcon className="w-5 h-5 text-red-500" />
+                    </div>
+                ) : ping !== null ? (
+                    <div className="mr-2 flex items-center bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm" title={`Ping: ${ping}ms`}>
+                        <span className={`text-xs font-mono font-bold mr-1.5 ${ping < 30 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                            {ping}ms
+                        </span>
+                        {ping < 30 ? (
+                            <SignalHighIcon className="w-4 h-4 text-green-500" />
+                        ) : (
+                            <SignalLowIcon className="w-4 h-4 text-orange-500" />
+                        )}
+                    </div>
+                ) : (
+                    <div className="mr-2 flex items-center justify-center px-2 py-1" title="Waiting for signal...">
+                        <SignalLowIcon className="w-5 h-5 text-gray-400 animate-pulse" />
+                    </div>
+                )}
+
+                <button onClick={handleToggleMenu} className="p-2 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                    <MoreVerticalIcon className="w-5 h-5" />
+                </button>
+                {isMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-gray-900 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700 top-full">
+                    <button onClick={handleRename} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-md">Rename</button>
+                    <button onClick={handleDeleteClick} className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-md">Delete</button>
+                    </div>
+                )}
+                </div>
+            </div>
+            <div className="mt-3">
+            <StatusIndicator status={status} errorMessage={errorMessage} otaProgress={otaProgress} otaStatus={otaStatus} />
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-x-2 text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center truncate" title={`${actionLabel}: ${formatTime(actionTime)}`}>
+                    <ClockIcon className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
+                    <span className="truncate">{actionLabel}: {formatTime(actionTime)}</span>
+                </div>
+                <div className="flex items-center truncate" title={`Last Seen: ${formatTime(displayLastSeen)}`}>
+                    <WifiIcon className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
+                    <span className="truncate">Last Seen: {formatTime(displayLastSeen)}</span>
+                </div>
             </div>
         </div>
-        <div className="mt-3">
-          <StatusIndicator status={status} errorMessage={errorMessage} otaProgress={otaProgress} otaStatus={otaStatus} />
+        <button 
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(device.device_id);
+            }} 
+            className="mt-4 w-full text-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-500 transition-colors"
+        >
+            Open Panel
+        </button>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-x-2 text-xs text-gray-500 dark:text-gray-400">
-            <div className="flex items-center truncate" title={`${actionLabel}: ${formatTime(actionTime)}`}>
-                <ClockIcon className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
-                <span className="truncate">{actionLabel}: {formatTime(actionTime)}</span>
-            </div>
-            <div className="flex items-center truncate" title={`Last Seen: ${formatTime(displayLastSeen)}`}>
-                <WifiIcon className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
-                <span className="truncate">Last Seen: {formatTime(displayLastSeen)}</span>
-            </div>
-        </div>
-      </div>
-      <button 
-        onClick={(e) => {
-            e.stopPropagation();
-            onSelect(device.device_id);
-        }} 
-        className="mt-4 w-full text-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-500 transition-colors"
-      >
-        Open Panel
-      </button>
-    </div>
+
+        {/* Delete Confirmation Modal */}
+        <ConfirmModal 
+            isOpen={showDeleteConfirm}
+            title="Delete Device"
+            message={`Are you sure you want to delete "${device.custom_name}"? This action cannot be undone.`}
+            confirmLabel="Delete"
+            cancelLabel="Cancel"
+            onConfirm={handleConfirmDelete}
+            onCancel={() => setShowDeleteConfirm(false)}
+            isDestructive={true}
+        />
+    </>
   );
 };
 
