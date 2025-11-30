@@ -1,0 +1,7 @@
+{
+  "name": "Remote Rebooter Web App",
+  "description": "A web application to manage multiple ESP32-based router resetter devices via MQTT.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
