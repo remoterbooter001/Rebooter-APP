@@ -35,12 +35,12 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             <div className="absolute inset-0 bg-blue-500 rounded-full opacity-20 animate-ping"></div>
             
             <img 
-                src="/splash-logo.png" 
+                src="splash-logo.png" 
                 alt="App Logo" 
                 className="w-full h-full object-contain relative z-10 drop-shadow-2xl"
                 onError={(e) => {
                     // Fallback to pwa-icon if splash-logo doesn't exist yet
-                    e.currentTarget.src = '/pwa-icon.png';
+                    e.currentTarget.src = 'pwa-icon.png';
                 }}
             />
         </div>

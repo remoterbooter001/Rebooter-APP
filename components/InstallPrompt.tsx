@@ -25,37 +25,31 @@ const InstallPrompt: React.FC = () => {
     if (isDesktop) setPlatformText("Install to Desktop");
 
     // 3. Desktop/Android: Listen for 'beforeinstallprompt'
-    // This event fires when Chrome/Edge decides the app is installable.
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Show IMMEDIATELY when the browser is ready
       setShowPrompt(true); 
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // 4. iOS: Show immediately (with tiny delay for animation smoothness)
+    // 4. iOS: Show immediately
     if (isIos && !isStandalone) {
-        const timer = setTimeout(() => setShowPrompt(true), 500); 
+        const timer = setTimeout(() => setShowPrompt(true), 1000); 
         return () => clearTimeout(timer);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [isStandalone]);
+  }, []);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
 
-    // Show the native browser install prompt
     deferredPrompt.prompt();
-
-    // Wait for the user to respond
     const { outcome } = await deferredPrompt.userChoice;
     
-    // Clear prompt if accepted
     if (outcome === 'accepted') {
         setDeferredPrompt(null);
         setShowPrompt(false);
@@ -72,7 +66,6 @@ const InstallPrompt: React.FC = () => {
     <div className="fixed bottom-4 left-4 right-4 z-[90] animate-in slide-in-from-bottom-5 fade-in duration-500">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border border-blue-100 dark:border-gray-600 p-5 max-w-md mx-auto relative flex flex-col sm:flex-row items-center gap-4 ring-1 ring-black/5">
         
-        {/* Close Button */}
         <button 
             onClick={handleDismiss} 
             className="absolute -top-2 -right-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-300 rounded-full p-1 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-sm"

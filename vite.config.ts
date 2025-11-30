@@ -17,21 +17,21 @@ export default defineConfig({
         theme_color: '#1f2937',
         background_color: '#1f2937',
         display: 'standalone',
-        scope: './',
-        start_url: './',
+        scope: '.',
+        start_url: '.',
         orientation: 'portrait',
         icons: [
           {
             src: 'pwa-icon.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
             src: 'pwa-icon.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           }
         ]
       }
